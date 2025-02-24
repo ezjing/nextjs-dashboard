@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { fetchInvoicesPages } from "@/app/lib/data";
 
 export default async function Page(props: {
-  // searchParams는 서버컴포넌트에서 URL의 쿼리 스트링을 자동으로 가져와서 props로 전달
+  // searchParams: URL의 쿼리 스트링에서 추출된 값들 (예: /dashboard/invoices?id=123에서 id)
   searchParams?: Promise<{
     query?: string;
     page?: string;

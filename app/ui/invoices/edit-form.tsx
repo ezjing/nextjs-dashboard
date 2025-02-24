@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
+import { updateInvoice } from '@/app/lib/actions';
 
 export default function EditInvoiceForm({
   invoice,
@@ -17,8 +18,16 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
+  // bind(자바스크립트 this(null), updateInvoice 함수의 첫 번째 매개변수, updateInvoice 함수의 두 번째 매개변수, ...)
+  // form action은 기본적으로 form 내부 데이터를 자동으로 첫 번째 인수로 받아옴
+  // updateInvoiceWithId 함수는 bind를 사용하여 invoice.id를 첫 번째 인수로 고정해두었기 때문에, form이 제출될 때 form 내부 데이터가 두 번째 인수로 자동 전달
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id); 
+
   return (
-    <form>
+    // updateInvoiceWithId: 함수에 전달할 매개변수가 없으면 함수자체를 참조하거나 .bind함수를 사용하여 invoice.id를 고정으로 사용하는 새로운 함수 updateInvoiceWithId함수 만들어 사용
+    // updateInvoice(id) : form태그가 바인딩되면 바로 실행되기 때문에 사용 불가
+    // <form action={updateInvoice(id)}></form>
+    <form action={updateInvoiceWithId}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">

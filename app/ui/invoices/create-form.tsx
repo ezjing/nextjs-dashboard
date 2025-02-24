@@ -7,10 +7,12 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
+import { createInvoice } from '@/app/lib/actions';
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
   return (
-    <form>
+    // form action은 기본적으로 form 내부 데이터를 자동으로 첫 번째 인수로 받아옴
+    <form action={createInvoice}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
