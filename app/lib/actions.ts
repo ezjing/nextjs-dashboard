@@ -22,49 +22,113 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(), //  문자열을 숫자로 강제 변환하고 숫자 유형의 유효성을 검사
-  status: z.enum(["pending", "paid"]), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
+  customerId: z.string({
+    invalid_type_error: "Please select a customer.",
+  }),
+  // z.coerce : 문자열을 숫자로 강제 변환하고 숫자 유형의 유효성을 검사
+  // .gt(0, {}) : 숫자가 0보다 커야 한다는 조건
+  amount: z.coerce
+    .number()
+    .gt(0, { message: "Please enter an amount greater than $0." }),
+  status: z.enum(["pending", "paid"], {
+    invalid_type_error: "Please select an invoice status.",
+  }), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
   date: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true }); // FormSchema에서 id와 date 필드를 제외한 새로운 스키마(createInvoice에서 두 필드 사용안함함)
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
-  // parse : Zod 스키마에 맞게 검증하고, 검증된 데이터를 반환(정확한 타입인게 보증됨)
-  const { customerId, amount, status } = CreateInvoice.parse({
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
+// prevState : useActionState 후크에서 전달된 상태를 포함함
+export async function createInvoice(prevState: State, formData: FormData) {
+  // safeParse : success 또는 error 필드 중 하나의 객체를 반환
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
+  // parse : Zod 스키마에 맞게 검증하고, 검증된 데이터를 반환(정확한 타입인게 보증됨)
+  // const { customerId, amount, status } = CreateInvoice.parse({
+  //   customerId: formData.get("customerId"),
+  //   amount: formData.get("amount"),
+  //   status: formData.get("status"),
+  // });
+  console.log("validatedFields: ", validatedFields);
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Create Invoice.",
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100; // 금액을 센트로 저장
   const date = new Date().toISOString().split("T")[0];
 
-  await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
+  try {
+    await sql`
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    `;
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Create Invoice.",
+    };
+  }
 
   revalidatePath("/dashboard/invoices"); // 특정 경로의 캐시된 데이터를 갱신(새로고침)하는 역할, 리디렉트 후에도 이전 데이터가 유지될 가능성이 있음. 그러므로 최신 데이터를 확실히 반영하기 위해 revalidatePath()를 쓰고 redirect()를 사용
   redirect("/dashboard/invoices"); // 특정 페이지로 강제 이동(리디렉트) 하는 역할(캐시를 갱신하고 리다이렉트 해야함 revalidatePath() 선행 후 redirect() 사용)
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateInvoice(
+  id: string,
+  prevState: State,
+  formData: FormData
+) {
+  const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
 
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Update Invoice.",
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
 
-  await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    WHERE id = ${id}
-  `;
+  try {
+    await sql`
+        UPDATE invoices
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        WHERE id = ${id}
+      `;
+  } catch (error) {
+    return {
+      message: "Database Error: Failed to Update Invoice.",
+    };
+  }
 
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
+}
+
+export async function deleteInvoice(id: string) {
+  throw new Error("Failed to Delete Invoice");
+
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
+  revalidatePath("/dashboard/invoices");
 }
