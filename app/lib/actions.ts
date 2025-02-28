@@ -24,7 +24,7 @@ const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
     invalid_type_error: "Please select a customer.",
-  }),
+  }).default(""),
   // z.coerce : 문자열을 숫자로 강제 변환하고 숫자 유형의 유효성을 검사
   // .gt(0, {}) : 숫자가 0보다 커야 한다는 조건
   amount: z.coerce
@@ -32,7 +32,7 @@ const FormSchema = z.object({
     .gt(0, { message: "Please enter an amount greater than $0." }),
   status: z.enum(["pending", "paid"], {
     invalid_type_error: "Please select an invoice status.",
-  }), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
+  }).default("pending"), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
   date: z.string(),
 });
 
