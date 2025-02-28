@@ -1,7 +1,7 @@
 import { generateYAxis } from "@/app/lib/utils";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { lusitana } from "@/app/ui/fonts";
-import { Revenue } from "@/app/lib/definitions"; // 테이블 정의 파일
+// import { Revenue } from "@/app/lib/definitions"; // 테이블 정의 파일
 import { fetchRevenue } from "@/app/lib/data";
 
 // This component is representational only.

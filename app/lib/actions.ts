@@ -24,7 +24,7 @@ const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
     invalid_type_error: "Please select a customer.",
-  }).default(""),
+  }),
   // z.coerce : 문자열을 숫자로 강제 변환하고 숫자 유형의 유효성을 검사
   // .gt(0, {}) : 숫자가 0보다 커야 한다는 조건
   amount: z.coerce
@@ -32,7 +32,7 @@ const FormSchema = z.object({
     .gt(0, { message: "Please enter an amount greater than $0." }),
   status: z.enum(["pending", "paid"], {
     invalid_type_error: "Please select an invoice status.",
-  }).default("pending"), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
+  }), // 열거형 'pending' 또는 'paid' 중 하나의 값만 허용
   date: z.string(),
 });
 
@@ -52,9 +52,9 @@ export type State = {
 export async function createInvoice(prevState: State, formData: FormData) {
   // safeParse : success 또는 error 필드 중 하나의 객체를 반환
   const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get("customerId") || "",
-    amount: formData.get("amount") || "",
-    status: formData.get("status") || "",
+    customerId: formData.get("customerId"),
+    amount: formData.get("amount"),
+    status: formData.get("status"),
   });
   // parse : Zod 스키마에 맞게 검증하고, 검증된 데이터를 반환(정확한 타입인게 보증됨)
   // const { customerId, amount, status } = CreateInvoice.parse({
@@ -80,6 +80,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
+    console.log(error);
     return {
       message: "Database Error: Failed to Create Invoice.",
     };
@@ -117,6 +118,7 @@ export async function updateInvoice(
         WHERE id = ${id}
       `;
   } catch (error) {
+    console.log(error);
     return {
       message: "Database Error: Failed to Update Invoice.",
     };
