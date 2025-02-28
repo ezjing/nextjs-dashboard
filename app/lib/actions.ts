@@ -52,9 +52,9 @@ export type State = {
 export async function createInvoice(prevState: State, formData: FormData) {
   // safeParse : success 또는 error 필드 중 하나의 객체를 반환
   const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get("customerId"),
-    amount: formData.get("amount"),
-    status: formData.get("status"),
+    customerId: formData.get("customerId") || "",
+    amount: formData.get("amount") || "",
+    status: formData.get("status") || "",
   });
   // parse : Zod 스키마에 맞게 검증하고, 검증된 데이터를 반환(정확한 타입인게 보증됨)
   // const { customerId, amount, status } = CreateInvoice.parse({
