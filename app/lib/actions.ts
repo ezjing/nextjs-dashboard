@@ -1,6 +1,6 @@
 // 서버 액션(Server Action)은 서버에서 실행됨(개발자 도구가 아니라 서버 터미널에서 console 출력됨)
 // createInvoice(formData) 같은 서버 액션은 서버에서 실행되어야 하는데, "use server"를 생략하면 클라이언트에서 실행하려다가 오류가 발생
-//  Next.js는 기본적으로 모든 함수가 클라이언트에서 실행된다고 가정함
+// Next.js는 기본적으로 모든 함수가 클라이언트에서 실행된다고 가정함
 // 서버 전용 코드는 "use server", 클라이언트 전용 코드는 "use client"
 // "use client" → 클라이언트 컴포넌트 (인터랙션, 상태 관리 필요할 때)
 // "use server" → 서버 액션 (DB 쿼리, API 요청 같은 서버 전용 작업)
@@ -17,6 +17,8 @@ import { z } from "zod"; // Zod : 타입 검증 및 스키마 유효성 검사�
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -133,4 +135,23 @@ export async function deleteInvoice(id: string) {
 
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
 }
