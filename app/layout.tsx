@@ -1,5 +1,15 @@
 import "@/app/ui/global.css";
 import { inter } from "./ui/fonts";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | 이지징 대시보드', // 다른 페이지에서 지정한 제목이 %s 부분에 위치
+    default: '이지징 대시보드',
+  },
+  description: 'Next.js를 이용해 만든 대시보드(built with App Router)',
+  metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
+};
 
 export default function RootLayout({
   children,

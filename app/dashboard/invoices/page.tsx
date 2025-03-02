@@ -6,6 +6,12 @@ import { lusitana } from "@/app/ui/fonts";
 import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
 import { Suspense } from "react";
 import { fetchInvoicesPages } from "@/app/lib/data";
+import { Metadata } from "next";
+
+// 페이지마다 메타데이터를 넣어줄수 있음
+export const metadata: Metadata = {
+  title: 'Invoices',
+};
 
 export default async function Page(props: {
   // searchParams: URL의 쿼리 스트링에서 추출된 값들 (예: /dashboard/invoices?id=123에서 id)

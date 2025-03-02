@@ -32,3 +32,8 @@ head.tsx |	해당 페이지의 <head> 부분을 설정 (SEO 메타 태그 등)	|
 <Template> | 페이지 상태 유지 | 서버 | layout.tsx와 유사하지만, 새로운 상태 유지
 <Loading> | 페이지 로딩 시 UI 표시 | 서버 & 클라이언트 | loading.tsx에서 사용
 <Default> | 특정 경로가 선택되지 않았을 때 기본 UI 표시 | 서버 | default.tsx에서 사용
+
+favicon.icoo, pengraph-image.jpg을 /app폴더 루트로 옮기면, Next.js가 자동으로 이러한 파일을 식별하여 favicon과 OG 이미지로 사용
+
+이메일:user@nextmail.com
+비밀번호:123456

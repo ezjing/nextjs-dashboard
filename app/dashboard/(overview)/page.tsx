@@ -8,6 +8,11 @@ import {
   RevenueChartSkeleton,
 } from "@/app/ui/skeletons";
 import CardWrapper from "@/app/ui/dashboard/cards";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+};
 
 export default async function Page() {
   // request waterfall : 이전 요청이 데이터를 반환한 후에만 시작(fetchLogic1() => fetchLogic2()... 순서)
